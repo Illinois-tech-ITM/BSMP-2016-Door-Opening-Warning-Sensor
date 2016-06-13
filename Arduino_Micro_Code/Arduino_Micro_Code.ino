@@ -1,22 +1,31 @@
 int sigPin = 5; // Pin where the SIG from sonic rangefinder is plugged in
-int pulseWidth = 0; // Duration in milliseconds of the sonic rangefinder (the lesser (but >0) the closer to the rangefinder)
+#define LEDPIN 13
+#define DIST_THRES 5000
 
 void setup() {
+  pinMode(LEDPIN, OUTPUT);
   Serial.begin(9600); // Setting Serial port baud rate
-  while(!Serial){;} // Wait for the serial port be ready
+  while (!Serial) {
+    ; // Wait for the serial port be ready
+  }
 }
 
 void loop() {
-  pulseWidth = sonicPing(sigPin); // Getting distance from rangefinder
+  int pulseWidth = sonicPing(sigPin); // Getting distance from rangefinder
 
   // Printing in Serial plotter with fixed y-axis
   Serial.print(20000);
   Serial.print("\t");
   Serial.print(0);
   Serial.print("\t");
+  Serial.print(DIST_THRES);
+  Serial.print("\t");
   Serial.println(pulseWidth);
-  
-  delayMicroseconds(200);
+
+  // FOR TESTING -- ROMEVE BEFORE COMMITTING
+  warning(pulseWidth<DIST_THRES);
+
+  delay(500);
 }
 
 int sonicPing(int port) {
@@ -29,5 +38,18 @@ int sonicPing(int port) {
   // Receiving duration of echo pulse (distance in ms from rangefinder)
   pinMode(port, INPUT);
   return pulseIn(port, HIGH, 20000);
+}
+
+void warning(int warningLevel) {
+  if (warningLevel > 0) { // For this moment, warningLevel>0 => Warning
+    digitalWrite(LEDPIN, HIGH);
+
+  } else if (0 == warningLevel) { // warningLevel==0 => No Warning
+    digitalWrite(LEDPIN, LOW);
+
+  } else { // Error handling
+    Serial.println("ERROR: Warning Level cannot be negative");
+  }
+
 }
 
