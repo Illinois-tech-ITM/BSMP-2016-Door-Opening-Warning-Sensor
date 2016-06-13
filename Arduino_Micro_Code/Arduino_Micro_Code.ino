@@ -1,13 +1,12 @@
-int sigPin = 5; // Pin where the SIG from sonic rangefinder is plugged in
 #define LEDPIN 13
-#define DIST_THRES 5000
+#define DIST_THRES 15000
+
+int sigPin = 5; // Pin where the SIG from sonic rangefinder is plugged in
 
 void setup() {
   pinMode(LEDPIN, OUTPUT);
   Serial.begin(9600); // Setting Serial port baud rate
-  while (!Serial) {
-    ; // Wait for the serial port be ready
-  }
+  while (!Serial) {;} // Wait for the serial port be ready
 }
 
 void loop() {
@@ -15,17 +14,16 @@ void loop() {
 
   // Printing in Serial plotter with fixed y-axis
   Serial.print(20000);
-  Serial.print("\t");
+  Serial.print(F("\t"));
   Serial.print(0);
-  Serial.print("\t");
+  Serial.print(F("\t"));
   Serial.print(DIST_THRES);
-  Serial.print("\t");
+  Serial.print(F("\t"));
   Serial.println(pulseWidth);
 
-  // FOR TESTING -- ROMEVE BEFORE COMMITTING
   warning(pulseWidth<DIST_THRES);
 
-  delay(500);
+  delayMicroseconds(200); 
 }
 
 int sonicPing(int port) {
