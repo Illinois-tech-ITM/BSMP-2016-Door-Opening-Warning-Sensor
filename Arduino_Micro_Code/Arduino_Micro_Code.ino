@@ -1,16 +1,15 @@
-#define LEDPIN 13
-#define DIST_THRES 15000
-
-int sigPin = 5; // Pin where the SIG from sonic rangefinder is plugged in
+#define LEDPIN 13 // Pin where the LED for warning is hooked up
+#define DIST_THRES 15000 // Distance Threshold to be considered close to the door
+#define SIGPIN 5 // Pin where the SIG from sonic rangefinder is plugged in
 
 void setup() {
-  pinMode(LEDPIN, OUTPUT);
+  pinMode(LEDPIN, OUTPUT); // Setting warning pin
   Serial.begin(9600); // Setting Serial port baud rate
   while (!Serial) {;} // Wait for the serial port be ready
 }
 
 void loop() {
-  int pulseWidth = sonicPing(sigPin); // Getting distance from rangefinder
+  int pulseWidth = sonicPing(SIGPIN); // Getting distance from rangefinder
 
   // Printing in Serial plotter with fixed y-axis
   Serial.print(20000);
@@ -46,7 +45,7 @@ void warning(int warningLevel) {
     digitalWrite(LEDPIN, LOW);
 
   } else { // Error handling
-    Serial.println("ERROR: Warning Level cannot be negative");
+    Serial.println(F("ERROR: Warning Level cannot be negative"));
   }
 
 }
