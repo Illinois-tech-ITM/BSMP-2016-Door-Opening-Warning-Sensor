@@ -1,5 +1,8 @@
 #define LEDPIN 13 // Pin where the LED for warning is hooked up
-#define DIST_THRES 15000 // Distance Threshold to be considered close to the door
+#define L1_WARNING_DIST 18000 // Distance Threshold to low warning
+#define L2_WARNING_DIST 12000 // Distance Threshold to mid warning
+#define L3_WARNING_DIST 8000 // Distance Threshold to max warning
+#define TIMER_HIST 250 // Timer histeresys for warning level reduction
 #define SIGPIN 5 // Pin where the SIG from sonic rangefinder is plugged in
 
 void setup() {
@@ -16,11 +19,15 @@ void loop() {
   Serial.print(F("\t"));
   Serial.print(0);
   Serial.print(F("\t"));
-  Serial.print(DIST_THRES);
+  Serial.print(L1_WARNING_DIST);
+  Serial.print(F("\t"));
+  Serial.print(L2_WARNING_DIST);
+  Serial.print(F("\t"));
+  Serial.print(L3_WARNING_DIST);
   Serial.print(F("\t"));
   Serial.println(pulseWidth);
 
-  warning(pulseWidth<DIST_THRES);
+  warning(pulseWidth<L1_WARNING_DIST);
 
   delayMicroseconds(200); 
 }
