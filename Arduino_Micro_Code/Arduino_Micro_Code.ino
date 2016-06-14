@@ -1,9 +1,13 @@
 #define LEDPIN 13 // Pin where the LED for warning is hooked up
-#define L1_WARNING_DIST 18000 // Distance Threshold to low warning
-#define L2_WARNING_DIST 12000 // Distance Threshold to mid warning
-#define L3_WARNING_DIST 8000 // Distance Threshold to max warning
-#define TIMER_HIST 250 // Timer histeresys for warning level reduction
+#define L1_WARNING_DIST 5 // Distance (in m) Threshold to low warning
+#define L2_WARNING_DIST 2.5 // Distance (in m) Threshold to mid warning
+#define L3_WARNING_DIST 1 // Distance (in m) Threshold to max warning
+#define __time__(d) (d/343.0*2000000.0) // Convert m to us
+#define __dist__(t) (t/2000000.0*343.0) // Convert us to m
+#define TIMER_HIST 250 // Timer histeresys (in ms) for warning level reduction
 #define SIGPIN 5 // Pin where the SIG from sonic rangefinder is plugged in
+
+void (*warningFunc) ();
 
 void setup() {
   pinMode(LEDPIN, OUTPUT); // Setting warning pin
@@ -15,7 +19,7 @@ void loop() {
   int pulseWidth = sonicPing(); // Getting distance from rangefinder
 
   // Printing in Serial plotter with fixed y-axis
-  Serial.print(20000);
+  Serial.print(__dist__(20000));
   Serial.print(F("\t"));
   Serial.print(0);
   Serial.print(F("\t"));
@@ -25,15 +29,16 @@ void loop() {
   Serial.print(F("\t"));
   Serial.print(L3_WARNING_DIST);
   Serial.print(F("\t"));
-  Serial.println(pulseWidth);
+  Serial.println(__dist__(pulseWidth));
 
   warningHandling(pulseWidth);
+  warningFunc();
 
   delayMicroseconds(200); 
 }
 
 int sonicPing() {
-  // Sending 1 to port for 5us
+  // Sending 1 to port SIGPIN for 5us
   pinMode(SIGPIN, OUTPUT);
   digitalWrite(SIGPIN, HIGH);
   delayMicroseconds(5);
@@ -45,13 +50,43 @@ int sonicPing() {
 }
 
 void warningHandling(int pulseDuration) {
-  if (pulseDuration > L1_WARNING_DIST) { // Warning level 1
-    digitalWrite(LEDPIN, HIGH);
+
+  if (pulseDuration < __time__(L3_WARNING_DIST)) { // Warning Level 3
+    warningFunc = warningL3;
+    
+  } else if (pulseDuration < __time__(L2_WARNING_DIST)) { // Warning Level 2
+    warningFunc = warningL2;
+    
+  } else if (pulseDuration < __time__(L1_WARNING_DIST)) { // Warning Level 1
+    warningFunc = warningL1;
 
   } else { // No Warning
-    digitalWrite(LEDPIN, LOW);
-
+    warningFunc = noWarning;
+    
   }
 
+}
+
+void noWarning() {
+  if (digitalRead(LEDPIN) == HIGH){
+    digitalWrite(LEDPIN, LOW);
+  }
+}
+
+void warningL1() {
+  static byte lvl = 0;
+  analogWrite(LEDPIN, lvl++);  
+}
+
+void warningL2() {
+  static byte lvl = 0;
+  lvl += 15;
+  analogWrite(LEDPIN, lvl);
+}
+
+void warningL3() {
+  if (digitalRead(LEDPIN) == LOW){
+    digitalWrite(LEDPIN, HIGH);
+  }
 }
 
