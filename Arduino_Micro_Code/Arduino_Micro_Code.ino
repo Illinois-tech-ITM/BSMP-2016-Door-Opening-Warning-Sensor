@@ -6,7 +6,8 @@
 #define __dist__(t) (t/2000000.0*343.0) // Convert us to m
 #define TIMER_HIST 250 // Timer histeresys (in ms) for warning level reduction
 #define SIGPIN 5 // Pin where the SIG from sonic rangefinder is plugged in
-#define SAMPLES 2 // Peak Handling 
+#define SAMPLES 2 // Peak Handling
+
 void (*warningFunc) ();
 int lim = 3;
 
@@ -23,7 +24,7 @@ int sonicPing() {
   //Serial.print("Test2 ");
   return pulseIn(SIGPIN, HIGH, 20000);
 
-  
+
 }
 
 void warningHandling(int pulseDuration) {
@@ -43,10 +44,10 @@ void warningHandling(int pulseDuration) {
       thres = SAMPLES;
     }
     lim = 3;
-    
-    
-  } 
-  
+
+
+  }
+
   else if (pulseDuration < __time__(L2_WARNING_DIST)) { // Warning Level 2
     thres--;
     if (lim != 2) {
@@ -58,10 +59,10 @@ void warningHandling(int pulseDuration) {
       thres = SAMPLES;
     }
     lim = 2;
-    
-    
-  } 
-  
+
+
+  }
+
   else if (pulseDuration < __time__(L1_WARNING_DIST)) { // Warning Level 1
     thres--;
     if (lim != 1) {
@@ -73,10 +74,10 @@ void warningHandling(int pulseDuration) {
       thres = SAMPLES;
     }
     lim = 1;
-    
-    
-  } 
-  
+
+
+  }
+
   else { // No Warning
     thres--;
     if (lim != 0) {
@@ -88,8 +89,8 @@ void warningHandling(int pulseDuration) {
       thres = SAMPLES;
     }
     lim = 0;
-    
-    
+
+
   }
 }
 void noWarning() {
@@ -105,7 +106,7 @@ void warningL1() {
   if (++lvl == 255) {
     lvl = 0;
     digitalWrite(LEDPIN, !digitalRead(LEDPIN));
-  }  
+  }
 }
 
 void warningL2() {
@@ -143,4 +144,3 @@ void loop() {
   warningHandling(pulseWidth);
   warningFunc();
 }
-
