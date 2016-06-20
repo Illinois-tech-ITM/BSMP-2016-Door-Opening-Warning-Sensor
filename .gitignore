@@ -1,0 +1,7 @@
+*.yml
+.pioenvs
+.clang_complete
+.gcc-flags.json
+*.ini
+Arduino_Micro_Code/lib/*
+Arduino_Micro_Code/src/*
