@@ -9,36 +9,61 @@
 #define MAXDIST 200         // Maximum distance to be "too far away from door"
 #define MOVTOLERANCE 5      // Tolerance of distance sensor (in cm) to be considered stopped in place (empirical)
 #define SAMPLE_SIZE 50      // Number of samples to analyze to decide if warning should continue ringing
+#define KERNEL_SIZE 10      // Size of the low-pass filter
 
 //#define DEBUG
-#define DEBUG_RANGE
+//#define DEBUG_RANGE
+#define DEBUG_FILTER
 
 /********************************************
- *  Functions and Global Vars declaration   *
+ *  Functions, Enums and Global Vars declaration   *
  ********************************************/
 float lerp(float a, float b, float i);
 void solid(uint8_t R, uint8_t G, uint8_t B);
+void pushToFilter(float value);
+float updateMean();
 
 Maxbotix rangeSensorPW(SONIC_SENSOR_PIN, Maxbotix::PW, Maxbotix::LV, Maxbotix::NONE); // Class for using the sonic rangefinder
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LEDPIN, NEO_GRB + NEO_KHZ800); // Class for controlling LED ring
 boolean warningOn = false; // For controlling the buzzer toggle
 byte notApproachingCount = 0, approachingCount = 0;
 float lastRange = 999;
+float ranges[KERNEL_SIZE];
+float treatedRange;
+
+enum ObjectState {
+  APPROACHING,
+  STOPPED,
+  DISTANCING
+};
 
 /********************************
  *  Arduino-Specific Functions  *
  ********************************/
 void setup() {
-#if defined(DEBUG) || defined(DEBUG_RANGE)
+  
+#if defined(DEBUG) || defined(DEBUG_RANGE) || defined(DEBUG_FILTER)
   Serial.begin(9600);
   while(!Serial);
 #endif
+
   pixels.begin();
   pinMode(SOUNDPIN, OUTPUT);
 }
 
 void loop() {
-  float range = rangeSensorPW.getRange(); // Distance (in cm) of closest detected object from Sonic Rangefinder
+  pushToFilter(rangeSensorPW.getRange()); // Distance (in cm) of closest detected object from Sonic Rangefinder
+  float delta = -(treatedRange - updateMean());
+
+#if defined(DEBUG) || defined(DEBUG_FILTER)
+  for(int i = 0; i < KERNEL_SIZE-1; i++){
+    Serial.print(ranges[i]);Serial.print(" | ");    
+  }
+  Serial.println(ranges[KERNEL_SIZE-1]);
+  Serial.print("Mean: ");Serial.println(treatedRange);
+  Serial.print("delta: ");Serial.println(delta);
+#endif
+  /*
 #if defined(DEBUG) || defined(DEBUG_RANGE)
   Serial.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
   Serial.print("Range: ");Serial.print(range);Serial.println("\tcm.");
@@ -92,7 +117,7 @@ void loop() {
     } // End if Toggle
     
   } // End if Alarm System Distance handling
-  
+  */
 } // End Loop
 
 
@@ -108,5 +133,20 @@ void solid(uint8_t R, uint8_t G, uint8_t B) {
     pixels.setPixelColor(i, pixels.Color(R,G,B));
     pixels.show();
   }
+}
+
+void pushToFilter(float value) {
+  for(int i = 0; i<KERNEL_SIZE-1; i++){
+    ranges[i] = ranges[i+1];
+  }
+  ranges[KERNEL_SIZE-1] = value;
+}
+
+float updateMean() {
+  float m = 0;
+  for(int i = 0; i<KERNEL_SIZE; i++){
+    m+=ranges[i];
+  }
+  return treatedRange = m/KERNEL_SIZE;
 }
 
