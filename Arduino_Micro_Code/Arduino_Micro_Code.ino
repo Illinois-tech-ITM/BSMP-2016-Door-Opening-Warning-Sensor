@@ -56,6 +56,7 @@ void loop() {
   float delta = -(treatedRange - updateMean());
 
 #if defined(DEBUG) || defined(DEBUG_FILTER)
+  Serial.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
   for(int i = 0; i < KERNEL_SIZE-1; i++){
     Serial.print(ranges[i]);Serial.print(" | ");    
   }
