@@ -1,10 +1,15 @@
 #include "Maxbotix/Maxbotix.h"   // Library of Sonic Rangefinder
 #include "NeoPixel/Neopixel.h"   // Library of LED Ring
+#include "Battery/Battery.h"     // Library for Battery Level reading
 
 #define SONIC_SENSOR_PIN 3  // Pin where the Sonic Rangefinder Controller is
 #define SOUNDPIN A5         // Pin where the buzzer signal will be sent
 #define SOUNDFREQ 440       // Sound Frequency of Buzzer
 #define LEDPIN A0           // Pin where warning NeoPixel ring is
+#define NUMPIXELS 48        // Total number of pixels in all NeoPixel rings
+#define BAT_DISC_VOLT 3200  // Voltage (in miliVolts) of our discharged battery
+#define BAT_CHAR_VOLT 4600  // Voltage (in miliVolts) of our charged battery
+#define BAT_MON_PIN A3      // Analog pin used to monitor battery voltage
 #define MAXDIST 200         // Maximum distance (in cm) to be "too far away from door"
 #define SAMPLE_SIZE 30      // Number of samples to analyze to decide if warning should continue ringing
                             // (affects how long someone needs to be stopped or distancing from door for the warning to stop)
@@ -16,6 +21,7 @@
 //#define DEBUG_APPROACH    // Activate debug messages of the approaching handler
 //#define DEBUG_FILTER      // Activate debug messages of the low pass filter
 //#define DEBUG_WARNING     // Activate debug messages of the LED and buzzer controller
+#define DEBUG_BATTERY     // Activate debug messages of the battery monitor
 
 
 
@@ -36,6 +42,7 @@ enum ObjectState {    // Enum of possible movements of a detected person
 
 Maxbotix rangeSensorPW(SONIC_SENSOR_PIN, Maxbotix::PW, Maxbotix::LV, Maxbotix::NONE);     // For using the sonic rangefinder
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LEDPIN, NEO_GRB + NEO_KHZ800);    // For controlling LED ring
+Battery batteryMonitor = Battery(BAT_DISC_VOLT, BAT_CHAR_VOLT, BAT_MON_PIN);
 float ranges[KERNEL_SIZE];      // Kernel for low pass filter (array with last KERNEL_SIZE measures)
 float treatedRange;             // Range after filtering
 ObjectState state = STOPPED;    // Actual movement of the person
@@ -46,14 +53,15 @@ ObjectState state = STOPPED;    // Actual movement of the person
  *  Arduino-Specific Functions  *
  ********************************/
 void setup() {
-  #if defined(DEBUG) || defined(DEBUG_APPROACH) || defined(DEBUG_FILTER) || defined(DEBUG_WARNING)
+  #if defined(DEBUG) || defined(DEBUG_APPROACH) || defined(DEBUG_FILTER) || defined(DEBUG_WARNING) || defined(DEBUG_BATTERY)
   {
     Serial.begin(9600);
     while(!Serial);
   }
-  #endif // DEBUG || DEBUG_APPROACH || DEBUG_FILTER || DEBUG_WARNING
+  #endif // DEBUG || DEBUG_APPROACH || DEBUG_FILTER || DEBUG_WARNING || DEBUG_BATTERY
     pixels.begin();
     pinMode(SOUNDPIN, OUTPUT);
+    batteryMonitor.begin();
 } // setup
 
 void loop() {
@@ -136,6 +144,17 @@ void loop() {
             toggleWarning();
         } // if toggle
     } // else turn warning on
+
+  #if defined(DEBUG) || defined(DEBUG_BATTERY)
+  {
+    Serial.print("Battery voltage is ");
+    Serial.print(batteryMonitor.voltage());
+    Serial.print(" mV (");
+    Serial.print(batteryMonitor.level());
+    Serial.println("%)");
+  }
+  #endif // DEBUG || DEBUG_BATTERY
+    
 } // loop
 
 
