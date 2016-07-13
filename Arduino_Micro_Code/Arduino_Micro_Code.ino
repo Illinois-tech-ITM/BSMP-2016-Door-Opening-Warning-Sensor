@@ -5,7 +5,6 @@
 #define SOUNDPIN A5         // Pin where the buzzer signal will be sent
 #define SOUNDFREQ 440       // Sound Frequency of Buzzer
 #define LEDPIN A0           // Pin where warning NeoPixel ring is
-#define NUMPIXELS 16        // Number of pixels in the NeoPixel ring
 #define MAXDIST 200         // Maximum distance (in cm) to be "too far away from door"
 #define SAMPLE_SIZE 30      // Number of samples to analyze to decide if warning should continue ringing
                             // (affects how long someone needs to be stopped or distancing from door for the warning to stop)
