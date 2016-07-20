@@ -13,11 +13,10 @@
                             // (bigger kernel yields less noise but more response latency)
 
 
-//#define DEBUG             // Activate all debug messages
+#define DEBUG             // Activate all debug messages
 //#define DEBUG_APPROACH    // Activate debug messages of the approaching handler
 //#define DEBUG_FILTER      // Activate debug messages of the low pass filter
 //#define DEBUG_WARNING     // Activate debug messages of the LED and buzzer controller
-
 
 
 /***************************************************
@@ -37,7 +36,6 @@ enum ObjectState {    // Enum of possible movements of a detected person
 
 Maxbotix rangeSensorPW(SONIC_SENSOR_PIN, Maxbotix::PW, Maxbotix::LV, Maxbotix::NONE);     // For using the sonic rangefinder
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LEDPIN, NEO_GRB + NEO_KHZ800);    // For controlling LED ring
-Battery batteryMonitor = Battery(BAT_DISC_VOLT, BAT_CHAR_VOLT, BAT_MON_PIN);
 float ranges[KERNEL_SIZE];      // Kernel for low pass filter (array with last KERNEL_SIZE measures)
 float treatedRange;             // Range after filtering
 ObjectState state = STOPPED;    // Actual movement of the person
@@ -56,7 +54,6 @@ void setup() {
   #endif // DEBUG || DEBUG_APPROACH || DEBUG_FILTER || DEBUG_WARNING
     pixels.begin();
     pinMode(SOUNDPIN, OUTPUT);
-    batteryMonitor.begin();
 } // setup
 
 void loop() {
@@ -129,8 +126,6 @@ void loop() {
         Serial.print("t_start: ");Serial.print(t_start);Serial.print("\tms.\t");
         Serial.print("m: ");Serial.print(m);Serial.print("\tms.\t");
         Serial.print("m-t_start: ");Serial.print(m-t_start);Serial.println("\tms.\t");
-        Serial.print("LED is ");Serial.print(digitalRead(LEDPIN)?"On.":"Off.");
-        Serial.print("\tBuzzer is ");Serial.println(warningOn?"On.":"Off.");
         Serial.println();
       }
       #endif // DEBUG || DEBUG_WARNING
@@ -139,7 +134,11 @@ void loop() {
             toggleWarning();
         } // if toggle
     } // else turn warning on
-    
+  #if defined(DEBUG) || defined(DEBUG_APPROACH) || defined(DEBUG_FILTER) || defined(DEBUG_WARNING)
+  {
+    Serial.println("\n-----------------------------------------------\n");
+  }
+  #endif // DEBUG || DEBUG_APPROACH || DEBUG_FILTER || DEBUG_WARNING
 } // loop
 
 
