@@ -4,8 +4,8 @@ This repo contains the code and schematics for creating an early warning system 
 
 ---------------------
 ### Participants
-* Gabriel Filipe Botelho Barbosa ([@bestknighter](@bestknighter))
-* Guilherme de Castro ([@guidecastro](@guidecastro))
+* Gabriel Filipe Botelho Barbosa ([@bestknighter](https://github.com/bestknighter))
+* Guilherme de Castro ([@guidecastro](https://github.com/guidecastro))
 * Luiz Gustavo de Marchi Brito
 * Matheus Braz Duque
 * Rodrigo Ferreira Abdulmassih
