@@ -13,7 +13,7 @@
                             // (bigger kernel yields less noise but more response latency)
 
 
-#define DEBUG             // Activate all debug messages
+//#define DEBUG             // Activate all debug messages
 //#define DEBUG_APPROACH    // Activate debug messages of the approaching handler
 //#define DEBUG_FILTER      // Activate debug messages of the low pass filter
 //#define DEBUG_WARNING     // Activate debug messages of the LED and buzzer controller
